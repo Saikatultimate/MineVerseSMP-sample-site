@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MineVerse BD - Minecraft Server</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #000000;
+      --green-primary: #00ff88;
+      --green-secondary: #00cc6a;
+      --green-glow: rgba(0, 255, 136, 0.35);
+      --green-dim: rgba(0, 255, 136, 0.1);
+      --text-primary: #ffffff;
+      --text-secondary: #cccccc;
+      --glass-bg: rgba(12, 12, 12, 0.75);
+      --scrollbar-height: 6px;
+      --header-height: 70px;
+      --blue-glow: #4d94ff;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      /* Default Desktop: Horizontal Scroll */
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: none;
+    }
+    body::-webkit-scrollbar { display: none; }
+
+    /* Video Background */
+    .video-bg {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      z-index: -2;
+    }
+
+    .custom-scrollbar {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: var(--scrollbar-height);
+      background: rgba(20, 20, 20, 0.9);
+      z-index: 2000;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .scrollbar-thumb {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green-primary), var(--green-secondary));
+      width: 0%;
+      border-radius: 0;
+      transition: width 0.1s linear;
+      box-shadow: 0 0 15px var(--green-glow);
+    }
+
+    .main-header {
+      position: fixed;
+      top: var(--scrollbar-height); left: 0; right: 0;
+      height: var(--header-height);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 60px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      z-index: 1500;
+    }
+
+    .logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--green-primary), #00ffcc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 3px;
+      text-decoration: none;
+    }
+
+    .header-right { display: flex; align-items: center; gap: 20px; }
+    .header-link {
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      padding: 8px 16px;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      transition: all 0.3s ease;
+    }
+    .header-link:hover { border-color: var(--green-primary); color: var(--green-primary); }
+
+    .header-text-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: 500;
+    }
+
+    /* Side Navigation Arrows */
+    .nav-arrow {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 50px;
+      height: 100px;
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 1000;
+      transition: all 0.3s ease;
+      font-size: 24px;
+    }
+    .nav-arrow:hover {
+      background: rgba(0, 255, 136, 0.1);
+      border-color: var(--green-primary);
+      color: var(--green-primary);
+      box-shadow: 0 0 20px var(--green-glow);
+    }
+    .nav-arrow.left { left: 0; border-radius: 0 10px 10px 0; border-left: none; }
+    .nav-arrow.right { right: 0; border-radius: 10px 0 0 10px; border-right: none; }
+    .nav-arrow svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2; fill: none; }
+
+    /* Desktop Horizontal Layout */
+    .horizontal-container {
+      display: flex;
+      height: 100vh;
+      width: max-content;
+      margin-top: var(--scrollbar-height);
+      scroll-snap-type: x mandatory;
+    }
+
+    .page-section {
+      height: 100vh;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 100px 80px;
+      position: relative;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      overflow: hidden;
+    }
+
+    .page-section:not(#ranks) { width: 100vw; }
+    #ranks.page-section { width: max-content; min-width: 100vw; padding: 100px 80px; }
+
+    .page-nav {
+      position: fixed;
+      bottom: 30px; left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 16px;
+      z-index: 1000;
+    }
+
+    .nav-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .nav-dot:hover { background: rgba(0, 255, 136, 0.3); }
+    .nav-dot.active { background: var(--green-primary); box-shadow: 0 0 12px var(--green-glow); transform: scale(1.3); }
+
+    /* Hero Side Content */
+    .side-content {
+      position: absolute;
+      width: 200px;
+      color: var(--text-secondary);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+      z-index: 5;
+    }
+    .side-content.left { left: 40px; top: 50%; transform: translateY(-50%) rotate(-90deg); transform-origin: left center; text-align: left; opacity: 0.6; }
+    .side-content.right { right: 40px; top: 50%; transform: translateY(-50%) rotate(90deg); transform-origin: right center; text-align: right; opacity: 0.6; }
+    
+    .feature-float {
+        position: absolute;
+        background: rgba(0,0,0,0.6);
+        padding: 10px 20px;
+        border-radius: 30px;
+        border: 1px solid rgba(255,255,255,0.1);
+        backdrop-filter: blur(5px);
+        font-size: 11px;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .feature-float svg { width: 14px; height: 14px; stroke: var(--green-primary); }
+    .feature-float.f1 { top: 25%; left: 10%; transform: translateX(-50%); }
+    .feature-float.f2 { bottom: 25%; right: 10%; transform: translateX(50%); }
+
+    /* UG Credit Footer */
+    .ug-credit {
+      position: absolute;
+      bottom: 20px;
+      right: 40px;
+      font-size: 11px;
+      color: var(--blue-glow);
+      text-shadow: 0 0 10px var(--blue-glow);
+      opacity: 0.8;
+      z-index: 10;
+      letter-spacing: 0.5px;
+    }
+
+    /* Glow Card Effect */
+    .card-glow { position: relative; }
+    .card-glow::before {
+      content: ''; position: absolute; top: -1px; left: -1px; right: -1px; bottom: -1px;
+      background: linear-gradient(45deg, transparent, rgba(0, 255, 136, 0.3), transparent);
+      border-radius: 17px; z-index: -1; opacity: 0; transition: opacity 0.3s ease; filter: blur(8px);
+    }
+    .card-glow:hover::before { opacity: 1; }
+
+    /* Hero Section */
+    .hero-content { text-align: center; max-width: 800px; z-index: 10; }
+    .hero-title { font-family: 'Orbitron', sans-serif; font-size: 72px; font-weight: 900; line-height: 1.05; margin-bottom: 24px; letter-spacing: -2px; text-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+    .hero-title .highlight { background: linear-gradient(135deg, var(--green-primary), #00ffcc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .hero-subtitle { font-size: 18px; color: var(--text-primary); margin-bottom: 40px; line-height: 1.6; text-shadow: 0 2px 10px rgba(0,0,0,0.8); }
+    .cta-buttons { display: flex; gap: 16px; justify-content: center; }
+    .cta-btn { padding: 14px 32px; border-radius: 8px; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-decoration: none; }
+    .cta-btn.primary { background: linear-gradient(135deg, var(--green-primary), var(--green-secondary)); color: #000; border: none; box-shadow: 0 0 25px var(--green-glow); }
+    .cta-btn.primary:hover { transform: translateY(-2px); box-shadow: 0 0 40px var(--green-glow); }
+    .cta-btn.secondary { background: rgba(0,0,0,0.7); color: var(--text-primary); border: 1px solid rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); }
+    .cta-btn.secondary:hover { border-color: var(--green-primary); background: var(--green-dim); }
+
+    .server-stats { display: flex; gap: 60px; margin-top: 60px; justify-content: center; }
+    .stat-item { text-align: center; }
+    .stat-value { font-family: 'Orbitron', sans-serif; font-size: 36px; font-weight: 700; color: var(--green-primary); text-shadow: 0 0 20px rgba(0,255,136,0.5); }
+    .stat-label { font-size: 11px; color: var(--text-primary); text-transform: uppercase; letter-spacing: 2px; margin-top: 8px; text-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+
+    /* Features */
+    .section-title { font-family: 'Orbitron', sans-serif; font-size: 42px; font-weight: 700; margin-bottom: 12px; text-align: center; text-shadow: 0 5px 15px rgba(0,0,0,0.8); }
+    .section-subtitle { color: var(--text-primary); font-size: 15px; margin-bottom: 50px; text-align: center; text-shadow: 0 2px 5px rgba(0,0,0,0.8); }
+    .features-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; max-width: 900px; }
+    .feature-card { background: var(--glass-bg); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 32px; backdrop-filter: blur(12px); transition: all 0.4s ease; position: relative; overflow: hidden; box-shadow: 0 0 30px rgba(0, 255, 136, 0.05); }
+    .feature-card:hover { border-color: rgba(0, 255, 136, 0.4); transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 30px rgba(0, 255, 136, 0.1); }
+    .feature-icon { width: 40px; height: 40px; margin-bottom: 20px; stroke: var(--green-primary); }
+    .feature-title { font-size: 16px; font-weight: 600; margin-bottom: 10px; }
+    .feature-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+
+    /* Rank Shop */
+    .ranks-wrapper { display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: center; perspective: 1500px; }
+    .ranks-container { display: flex; flex-direction: row; gap: 24px; perspective: 1000px; justify-content: center; padding: 0 40px; }
+    .rank-card { width: 160px; height: 260px; background: linear-gradient(160deg, rgba(20, 20, 20, 0.9), rgba(5, 5, 5, 0.95)); border-radius: 16px; display: flex; flex-direction: column; align-items: center; padding: 24px 16px; position: relative; transform-style: preserve-3d; transition: transform 0.2s ease-out, box-shadow 0.3s ease; cursor: pointer; box-shadow: 0 0 20px rgba(0, 255, 136, 0.05); text-decoration: none; color: white; }
+    .rank-card::after { content: ''; position: absolute; inset: 0; border-radius: 16px; border: 1px solid rgba(0, 255, 136, 0.15); pointer-events: none; transition: border-color 0.3s ease; }
+    .rank-card:hover::after { border-color: rgba(0, 255, 136, 0.6); box-shadow: 0 0 30px var(--green-glow); }
+    .rank-icon { width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; filter: drop-shadow(0 0 12px var(--green-glow)); }
+    .rank-icon svg { width: 100%; height: 100%; }
+    .rank-name { font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 700; margin-bottom: 8px; letter-spacing: 1px; }
+    .rank-price { font-size: 24px; font-weight: 700; color: var(--green-primary); margin-bottom: 14px; }
+    .rank-price span { font-size: 11px; color: var(--text-secondary); }
+    .rank-features { list-style: none; font-size: 10px; color: var(--text-secondary); text-align: center; line-height: 1.8; }
+    .rank-buy-btn { margin-top: auto; padding: 8px 20px; background: var(--green-primary); color: #000; border: none; border-radius: 6px; font-family: inherit; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; display: inline-block; text-decoration: none; }
+    .rank-buy-btn:hover { box-shadow: 0 0 25px var(--green-glow); transform: scale(1.08); }
+
+    /* Community */
+    .community-content { display: flex; gap: 60px; align-items: center; max-width: 1000px; }
+    .community-text { flex: 1; }
+    .community-visual { flex: 1; display: flex; justify-content: center; }
+    .discord-card { background: var(--glass-bg); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 16px; padding: 40px; text-align: center; backdrop-filter: blur(12px); width: 300px; box-shadow: 0 0 40px rgba(0, 255, 136, 0.08); }
+    .discord-icon { width: 55px; height: 55px; margin: 0 auto 20px; }
+    .discord-icon svg { width: 100%; height: 100%; fill: #5865F2; }
+    .discord-title { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+    .discord-members { color: var(--text-secondary); margin-bottom: 24px; font-size: 13px; }
+    .discord-btn { display: inline-flex; align-items: center; gap: 10px; padding: 12px 24px; background: #5865F2; color: white; border: none; border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; }
+    .discord-btn:hover { background: #4752c4; transform: translateY(-2px); }
+    .community-list { margin-top: 30px; }
+    .community-item { display: flex; align-items: center; gap: 16px; padding: 16px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+    .community-item-icon { width: 40px; height: 40px; background: var(--green-dim); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+    .community-item-icon svg { width: 18px; height: 18px; stroke: var(--green-primary); }
+
+    /* Join */
+    .join-content { text-align: center; max-width: 500px; }
+    .server-ip-box { background: rgba(0,0,0,0.6); border: 2px solid var(--green-primary); border-radius: 12px; padding: 24px 40px; margin: 40px auto; display: inline-block; box-shadow: 0 0 40px var(--green-glow); backdrop-filter: blur(10px); }
+    .server-ip { font-family: 'Orbitron', sans-serif; font-size: 24px; font-weight: 700; color: var(--green-primary); letter-spacing: 1px; }
+    .copy-btn { margin-top: 16px; padding: 10px 24px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255, 255, 255, 0.15); color: var(--text-primary); border-radius: 6px; font-family: inherit; font-size: 13px; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(10px); }
+    .copy-btn:hover { border-color: var(--green-primary); background: var(--green-dim); }
+    .version-info { color: var(--text-primary); font-size: 14px; margin-top: 24px; text-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+    .version-badge { display: inline-block; padding: 6px 18px; background: rgba(0, 255, 136, 0.05); border: 1px solid var(--green-primary); border-radius: 20px; font-size: 12px; color: var(--green-primary); margin-top: 12px; }
+
+    .main-footer {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(255, 255, 255, 0.03);
+      z-index: 1000;
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    /* MOBILE RESPONSIVE STYLES */
+    @media (max-width: 768px) {
+      /* Switch to Vertical Scroll */
+      body { overflow-x: hidden; overflow-y: auto; }
+      
+      .horizontal-container {
+        flex-direction: column;
+        width: 100%;
+        height: auto;
+        margin-top: 60px; /* Adjust for smaller header */
+        scroll-snap-type: y mandatory;
+      }
+
+      .page-section {
+        width: 100% !important;
+        height: auto;
+        min-height: 100vh; /* At least full height */
+        padding: 80px 20px 60px;
+        scroll-snap-align: start;
+      }
+
+      #ranks.page-section { width: 100% !important; padding: 80px 20px; }
+      
+      /* Header Adjustments */
+      .main-header { padding: 0 20px; height: 60px; top: 0; } /* Remove scrollbar offset on top */
+      .logo { font-size: 16px; }
+      .header-text-box { display: none; }
+
+      /* Hide Desktop Navigation */
+      .nav-arrow { display: none; }
+      .custom-scrollbar { display: none; }
+      
+      /* Hero Adjustments */
+      .hero-title { font-size: 36px; }
+      .side-content { display: none; }
+      .feature-float { display: none; }
+      .ug-credit { right: 20px; bottom: 10px; }
+      
+      /* Rank Layout Adjustments */
+      .ranks-container { 
+          display: grid; 
+          grid-template-columns: repeat(2, 1fr); 
+          gap: 16px; 
+          width: 100%; 
+          justify-items: center;
+          padding: 0;
+      }
+      .rank-card { width: 100%; max-width: 150px; height: 240px; }
+
+      /* Feature Grid Adjustments */
+      .features-grid { grid-template-columns: 1fr; gap: 16px; width: 100%; }
+      
+      /* Community Adjustments */
+      .community-content { flex-direction: column; gap: 40px; padding: 0 20px; }
+      .discord-card { width: 100%; max-width: 280px; }
+
+      /* Footer */
+      .main-footer { position: relative; margin-top: auto; }
+      .page-nav { bottom: 15px; }
+    }
+  </style>
+</head>
+<body>
+  <video class="video-bg" autoplay muted loop playsinline>
+    <source src="overworld.mp4" type="video/mp4">
+  </video>
+
+  <div class="custom-scrollbar"><div class="scrollbar-thumb" id="scrollbarThumb"></div></div>
+
+  <header class="main-header">
+    <a href="index.html" class="logo">MINEVERSE</a>
+    <div class="header-right">
+        <a href="login.html" class="header-link">Login</a>
+        <div class="header-text-box">Season 3 Now Live - New Survival World</div>
+    </div>
+  </header>
+
+  <!-- Side Navigation Arrows -->
+  <div class="nav-arrow left" id="navLeft"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></div>
+  <div class="nav-arrow right" id="navRight"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+
+  <main class="horizontal-container" id="mainContainer">
+    
+    <!-- Page 1: Hero -->
+    <section class="page-section" id="hero">
+      <div class="side-content left">Java Edition 1.20.4</div>
+      <div class="side-content right">Survival Mode / Economy</div>
+      
+      <div class="feature-float f1">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Anti-Cheat Enabled
+      </div>
+      <div class="feature-float f2">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        24/7 Uptime
+      </div>
+
+      <div class="hero-content">
+        <h1 class="hero-title">Welcome to<br><span class="highlight">MineVerse</span></h1>
+        <p class="hero-subtitle">Bangladesh's premier Minecraft survival server. Build, explore, and conquer with thousands of players in an epic community-driven world.</p>
+        <div class="cta-buttons">
+          <a href="#ranks" class="cta-btn primary">Get Ranks</a>
+          <a href="#join" class="cta-btn secondary">How to Join</a>
+        </div>
+        <div class="server-stats">
+          <div class="stat-item"><div class="stat-value" id="playerCount">--</div><div class="stat-label">Active Players</div></div>
+          <div class="stat-item"><div class="stat-value">99.9%</div><div class="stat-label">Uptime</div></div>
+          <div class="stat-item"><div class="stat-value">24/7</div><div class="stat-label">Online</div></div>
+        </div>
+      </div>
+      <div class="ug-credit">designed by UG.</div>
+    </section>
+
+    <!-- Page 2: Features -->
+    <section class="page-section" id="features">
+      <h2 class="section-title">Server Features</h2>
+      <p class="section-subtitle">Everything you need for the ultimate Minecraft experience</p>
+      <div class="features-grid">
+        <div class="feature-card card-glow">
+          <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          <h3 class="feature-title">Custom World Generation</h3>
+          <p class="feature-desc">Explore unique biomes and landscapes with our custom terrain generation.</p>
+        </div>
+        <div class="feature-card card-glow">
+          <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <h3 class="feature-title">Active Community</h3>
+          <p class="feature-desc">Join events, build competitions, and community projects.</p>
+        </div>
+        <div class="feature-card card-glow">
+          <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <h3 class="feature-title">Anti-Cheat Protection</h3>
+          <p class="feature-desc">Fair gameplay guaranteed with advanced anti-cheat systems.</p>
+        </div>
+        <div class="feature-card card-glow">
+          <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          <h3 class="feature-title">Lag-Free Experience</h3>
+          <p class="feature-desc">Premium hosting ensures smooth gameplay for everyone.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Page 3: Rank Shop -->
+    <section class="page-section" id="ranks">
+      <div class="ranks-wrapper">
+        <h2 class="section-title">Rank Shop</h2>
+        <p class="section-subtitle">Unlock exclusive perks and stand out from the crowd</p>
+        <div class="ranks-container" id="ranksContainer">
+          <!-- VIP -->
+          <a href="ranks/vip.html" class="rank-card">
+            <div class="rank-icon"><svg viewBox="0 0 100 100" fill="none"><path d="M50 10L15 35L25 75H75L85 35L50 10Z" stroke="#00ff88" stroke-width="3" fill="none"/><path d="M50 20L25 40L32 70H68L75 40L50 20Z" stroke="#00ff88" stroke-width="2" fill="rgba(0,255,136,0.1)"/><text x="50" y="55" text-anchor="middle" fill="#00ff88" font-family="Orbitron" font-size="14" font-weight="700">VIP</text></svg></div>
+            <h3 class="rank-name">VIP</h3>
+            <div class="rank-price">199 <span>BDT</span></div>
+            <ul class="rank-features"><li>Custom Chat Color</li><li>VIP Kit Monthly</li><li>5 Home Locations</li><li>Priority Queue</li></ul>
+            <span class="rank-buy-btn">Purchase</span>
+          </a>
+          <!-- MVP -->
+          <a href="ranks/mvp.html" class="rank-card">
+            <div class="rank-icon"><svg viewBox="0 0 100 100" fill="none"><polygon points="50,5 61,35 95,35 68,55 79,90 50,70 21,90 32,55 5,35 39,35" stroke="#00ff88" stroke-width="3" fill="none"/><polygon points="50,15 58,38 82,38 63,52 71,78 50,62 29,78 37,52 18,38 42,38" stroke="#00ff88" stroke-width="2" fill="rgba(0,255,136,0.15)"/><text x="50" y="52" text-anchor="middle" fill="#00ff88" font-family="Orbitron" font-size="11" font-weight="700">MVP</text></svg></div>
+            <h3 class="rank-name">MVP</h3>
+            <div class="rank-price">399 <span>BDT</span></div>
+            <ul class="rank-features"><li>All VIP Perks</li><li>MVP Kit Weekly</li><li>10 Home Locations</li><li>Fly in Spawn</li></ul>
+            <span class="rank-buy-btn">Purchase</span>
+          </a>
+          <!-- ELITE -->
+          <a href="ranks/elite.html" class="rank-card">
+            <div class="rank-icon"><svg viewBox="0 0 100 100" fill="none"><path d="M50 5L20 25L20 55L50 95L80 55L80 25L50 5Z" stroke="#00ff88" stroke-width="3" fill="none"/><path d="M50 15L28 32L28 55L50 85L72 55L72 32L50 15Z" stroke="#00ff88" stroke-width="2" fill="rgba(0,255,136,0.15)"/><circle cx="50" cy="48" r="15" stroke="#00ff88" stroke-width="2" fill="rgba(0,255,136,0.1)"/><text x="50" y="53" text-anchor="middle" fill="#00ff88" font-family="Orbitron" font-size="10" font-weight="700">ELITE</text></svg></div>
+            <h3 class="rank-name">ELITE</h3>
+            <div class="rank-price">699 <span>BDT</span></div>
+            <ul class="rank-features"><li>All MVP Perks</li><li>Elite Kit Daily</li><li>20 Home Locations</li><li>Custom Nickname</li></ul>
+            <span class="rank-buy-btn">Purchase</span>
+          </a>
+          <!-- LEGEND -->
+          <a href="ranks/legend.html" class="rank-card">
+            <div class="rank-icon"><svg viewBox="0 0 100 100" fill="none"><path d="M50 5L65 25L90 25L75 45L85 75L50 60L15 75L25 45L10 25L35 25L50 5Z" stroke="#00ff88" stroke-width="3" fill="none"/><path d="M50 15L60 30L80 30L70 45L77 68L50 55L23 68L30 45L20 30L40 30L50 15Z" stroke="#00ff88" stroke-width="2" fill="rgba(0,255,136,0.2)"/><text x="50" y="48" text-anchor="middle" fill="#00ff88" font-family="Orbitron" font-size="8" font-weight="700">LEGEND</text></svg></div>
+            <h3 class="rank-name">LEGEND</h3>
+            <div class="rank-price">1299 <span>BDT</span></div>
+            <ul class="rank-features"><li>All Elite Perks</li><li>Legend Kit Daily</li><li>Unlimited Homes</li><li>Particle Effects</li></ul>
+            <span class="rank-buy-btn">Purchase</span>
+          </a>
+          <!-- TITAN -->
+          <a href="ranks/titan.html" class="rank-card">
+            <div class="rank-icon"><svg viewBox="0 0 100 100" fill="none"><rect x="25" y="15" width="50" height="70" rx="5" stroke="#00ff88" stroke-width="3" fill="none"/><rect x="32" y="22" width="36" height="56" rx="3" stroke="#00ff88" stroke-width="2" fill="rgba(0,255,136,0.15)"/><line x1="35" y1="35" x2="65" y2="35" stroke="#00ff88" stroke-width="2"/><line x1="35" y1="45" x2="65" y2="45" stroke="#00ff88" stroke-width="2"/><line x1="35" y1="55" x2="55" y2="55" stroke="#00ff88" stroke-width="2"/><circle cx="50" cy="68" r="5" stroke="#00ff88" stroke-width="2" fill="rgba(0,255,136,0.2)"/><text x="50" y="28" text-anchor="middle" fill="#00ff88" font-family="Orbitron" font-size="8" font-weight="700">TITAN</text></svg></div>
+            <h3 class="rank-name">TITAN</h3>
+            <div class="rank-price">2499 <span>BDT</span></div>
+            <ul class="rank-features"><li>All Legend Perks</li><li>Titan Kit Daily</li><li>Private Vault</li><li>Pet Companion</li></ul>
+            <span class="rank-buy-btn">Purchase</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Page 4: Community -->
+    <section class="page-section" id="community">
+      <h2 class="section-title">Our Community</h2>
+      <p class="section-subtitle">Join thousands of players in our active community</p>
+      <div class="community-content">
+        <div class="community-text">
+          <p style="color: var(--text-primary); line-height: 1.7; margin-bottom: 16px; font-size: 15px; text-shadow: 0 2px 5px rgba(0,0,0,0.5);">MineVerse isn't just a server - it's a community. We host weekly events, build competitions, and community projects that bring players together.</p>
+          <div class="community-list">
+            <div class="community-item">
+              <div class="community-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+              <div><strong>Weekly Build Battles</strong><p style="color: var(--text-secondary); font-size: 13px;">Show your creativity and win prizes</p></div>
+            </div>
+            <div class="community-item">
+              <div class="community-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+              <div><strong>Monthly Tournaments</strong><p style="color: var(--text-secondary); font-size: 13px;">Compete for exclusive rewards</p></div>
+            </div>
+            <div class="community-item">
+              <div class="community-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+              <div><strong>Special Events</strong><p style="color: var(--text-secondary); font-size: 13px;">Holiday celebrations and more</p></div>
+            </div>
+          </div>
+        </div>
+        <div class="community-visual">
+          <div class="discord-card card-glow">
+            <div class="discord-icon"><svg viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg></div>
+            <h3 class="discord-title">Join Our Discord</h3>
+            <p class="discord-members">1,600+ Members</p>
+            <button onclick="window.location.href='https://discord.gg/mineverse-smp-1359832255878660186'" class="discord-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>Join Server</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Page 5: Join -->
+    <section class="page-section" id="join">
+      <h2 class="section-title">Ready to Play?</h2>
+      <p class="section-subtitle">Connect to our server and start your adventure</p>
+      <div class="join-content">
+        <div class="server-ip-box"><div class="server-ip">tiger.qbitnode.com:5929</div></div>
+        <button class="copy-btn" id="copyBtn">Copy Server IP</button>
+        <div class="version-info"><p>Connect using Minecraft Java Edition</p><div class="version-badge">Version 1.20.4</div></div>
+        <div style="margin-top: 50px; display: flex; gap: 16px; justify-content: center;">
+          <a href="#ranks" class="cta-btn primary">Buy a Rank</a>
+          <a href="rules.html" class="cta-btn secondary">View Rules</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <nav class="page-nav">
+    <div class="nav-dot active" data-page="0"></div>
+    <div class="nav-dot" data-page="1"></div>
+    <div class="nav-dot" data-page="2"></div>
+    <div class="nav-dot" data-page="3"></div>
+    <div class="nav-dot" data-page="4"></div>
+  </nav>
+
+  <footer class="main-footer">MineVerse BD - Bangladesh's Premier Minecraft Server</footer>
+
+  <script>
+    const scrollbarThumb = document.getElementById('scrollbarThumb');
+    const navDots = document.querySelectorAll('.nav-dot');
+    const sections = document.querySelectorAll('.page-section');
+    const navLeft = document.getElementById('navLeft');
+    const navRight = document.getElementById('navRight');
+    let isMobile = window.innerWidth <= 768;
+
+    function updateLayoutMode() { isMobile = window.innerWidth <= 768; }
+
+    function goToSection(index) {
+        if(index < 0 || index >= sections.length) return;
+        const targetSection = sections[index];
+        if (isMobile) { window.scrollTo({ top: targetSection.offsetTop, behavior: 'smooth' }); } 
+        else { window.scrollTo({ left: targetSection.offsetLeft, behavior: 'smooth' }); }
+    }
+
+    navDots.forEach(dot => { dot.addEventListener('click', () => { goToSection(parseInt(dot.dataset.page)); }); });
+    navLeft.addEventListener('click', () => { goToSection(getCurrentIndex() - 1); });
+    navRight.addEventListener('click', () => { goToSection(getCurrentIndex() + 1); });
+
+    function getCurrentIndex() {
+        const scrollPos = isMobile ? window.scrollY : window.scrollX;
+        const viewportSize = isMobile ? window.innerHeight : window.innerWidth;
+        let currentIndex = 0;
+        sections.forEach((section, index) => {
+            const sectionPos = isMobile ? section.offsetTop : section.offsetLeft;
+            if (scrollPos >= sectionPos - viewportSize / 2) { currentIndex = index; }
+        });
+        return currentIndex;
+    }
+
+    function updateActiveNav() {
+      const currentIndex = getCurrentIndex();
+      navDots.forEach((dot, index) => { dot.classList.toggle('active', index === currentIndex); });
+      if (!isMobile) {
+          navLeft.style.opacity = currentIndex === 0 ? '0.2' : '1';
+          navLeft.style.pointerEvents = currentIndex === 0 ? 'none' : 'auto';
+          navRight.style.opacity = currentIndex === sections.length - 1 ? '0.2' : '1';
+          navRight.style.pointerEvents = currentIndex === sections.length - 1 ? 'none' : 'auto';
+          const scrollWidth = document.documentElement.scrollWidth - window.innerWidth;
+          scrollbarThumb.style.width = (window.scrollX / scrollWidth) * 100 + '%';
+      }
+    }
+
+    window.addEventListener('scroll', updateActiveNav);
+    window.addEventListener('resize', () => { updateLayoutMode(); updateActiveNav(); });
+    
+    // Rank card 3D tilt effect
+    const ranksContainer = document.getElementById('ranksContainer');
+    const rankCards = document.querySelectorAll('.rank-card');
+    function handleTilt(e) {
+      const mouseX = e.clientX; const mouseY = e.clientY;
+      rankCards.forEach(card => {
+        const rect = card.getBoundingClientRect();
+        const cardCenterX = rect.left + rect.width / 2; const cardCenterY = rect.top + rect.height / 2;
+        const deltaX = mouseX - cardCenterX; const deltaY = mouseY - cardCenterY;
+        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        const maxDistance = 500;
+        const intensity = Math.max(0, 1 - distance / maxDistance);
+        const rotateY = (deltaX / (window.innerWidth / 2)) * 18 * intensity;
+        const rotateX = -(deltaY / (window.innerHeight / 2)) * 18 * intensity;
+        card.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(${1 + intensity * 0.05})`;
+      });
+    }
+    function resetTilt() { rankCards.forEach(card => { card.style.transform = 'perspective(800px) rotateX(0) rotateY(0) scale(1)'; }); }
+    document.addEventListener('mousemove', handleTilt);
+    document.addEventListener('mouseleave', resetTilt);
+
+    // Player count animation
+    const playerCount = document.getElementById('playerCount'); let count = 50; 
+    setInterval(() => { const change = Math.floor(Math.random() * 10) - 3; count = Math.max(10, Math.min(100, count + change)); playerCount.textContent = count.toLocaleString(); }, 2000);
+
+    // Copy IP
+    const copyBtn = document.getElementById('copyBtn');
+    copyBtn.addEventListener('click', () => { navigator.clipboard.writeText('tiger.qbitnode.com:5929').then(() => { copyBtn.textContent = 'Copied!'; setTimeout(() => { copyBtn.textContent = 'Copy Server IP'; }, 2000); }); });
+
+    // Keyboard Navigation
+    document.addEventListener('keydown', (e) => {
+      const currentIndex = getCurrentIndex();
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { goToSection(currentIndex + 1); }
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { goToSection(currentIndex - 1); }
+    });
+
+    updateLayoutMode(); updateActiveNav();
+  </script>
+</body>
+</html>
