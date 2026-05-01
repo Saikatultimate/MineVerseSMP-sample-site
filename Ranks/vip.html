@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VIP Rank - MineVerse BD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --green-primary: #00ff88; --green-secondary: #00cc6a; --green-glow: rgba(0, 255, 136, 0.5); --glass-bg: rgba(10, 10, 10, 0.85); }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Space Grotesk', sans-serif; background: #000; color: #fff; overflow-x: hidden; min-height: 100vh; }
+    .video-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
+    
+    .container { display: flex; min-height: 100vh; width: 100%; align-items: center; justify-content: center; padding: 40px 20px; }
+    
+    /* Split Layout */
+    .split-card { display: flex; width: 100%; max-width: 1000px; background: var(--glass-bg); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; overflow: hidden; backdrop-filter: blur(15px); box-shadow: 0 0 50px rgba(0,0,0,0.5); }
+    
+    .left-panel { flex: 1; padding: 50px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.2); border-right: 1px solid rgba(255,255,255,0.05); position: relative; overflow: hidden; }
+    .left-panel::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(0,255,136,0.1) 0%, transparent 60%); opacity: 0.5; }
+    
+    .right-panel { flex: 1.5; padding: 50px; display: flex; flex-direction: column; justify-content: center; }
+
+    .rank-icon { width: 140px; height: 140px; margin-bottom: 30px; filter: drop-shadow(0 0 30px var(--green-glow)); position: relative; z-index: 2; animation: float 4s ease-in-out infinite; }
+    .rank-title { font-family: 'Orbitron', sans-serif; font-size: 42px; font-weight: 900; text-align: center; background: linear-gradient(to bottom right, #fff, var(--green-primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
+    .rank-price-tag { font-family: 'Orbitron', sans-serif; font-size: 28px; color: var(--green-primary); text-align: center; font-weight: 700; }
+    .rank-price-tag span { font-size: 14px; color: #888; font-family: 'Space Grotesk', sans-serif; font-weight: 500; }
+
+    .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 25px; margin-top: 20px; }
+    .section-header h3 { font-family: 'Orbitron', sans-serif; font-size: 14px; letter-spacing: 1px; color: var(--green-primary); text-transform: uppercase; }
+    .section-line { flex: 1; height: 1px; background: linear-gradient(90deg, var(--green-primary), transparent); }
+
+    .perk-list { list-style: none; }
+    .perk-item { display: flex; align-items: flex-start; gap: 15px; margin-bottom: 18px; opacity: 0; transform: translateY(20px); animation: fadeInUp 0.5s forwards; }
+    .perk-item:nth-child(1) { animation-delay: 0.1s; }
+    .perk-item:nth-child(2) { animation-delay: 0.2s; }
+    .perk-item:nth-child(3) { animation-delay: 0.3s; }
+    .perk-item:nth-child(4) { animation-delay: 0.4s; }
+    .perk-icon-box { width: 40px; height: 40px; background: rgba(0,255,136,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid rgba(0,255,136,0.2); }
+    .perk-icon-box svg { width: 20px; height: 20px; stroke: var(--green-primary); }
+    .perk-content h4 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+    .perk-content p { font-size: 13px; color: #aaa; line-height: 1.5; }
+
+    .actions { display: flex; gap: 15px; margin-top: 30px; }
+    .btn { padding: 14px 30px; border-radius: 8px; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; }
+    .btn-buy { flex: 1; background: var(--green-primary); color: #000; border: none; box-shadow: 0 0 20px var(--green-glow); justify-content: center; }
+    .btn-buy:hover { transform: translateY(-2px); box-shadow: 0 0 30px var(--green-glow); }
+    .btn-back { background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); }
+    .btn-back:hover { background: rgba(255,255,255,0.1); }
+
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 768px) {
+        .container { padding: 20px; align-items: flex-start; margin-top: 40px; }
+        .split-card { flex-direction: column; }
+        .left-panel { padding: 30px; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .right-panel { padding: 30px; }
+        .rank-icon { width: 100px; height: 100px; }
+    }
+  </style>
+</head>
+<body>
+  <video class="video-bg" src="overworld.mp4" autoplay muted loop playsinline></video>
+  
+  <div class="container">
+    <div class="split-card">
+      <div class="left-panel">
+        <div class="rank-icon">
+          <svg viewBox="0 0 100 100" fill="none">
+            <path d="M50 10L15 35L25 75H75L85 35L50 10Z" stroke="#00ff88" stroke-width="3" fill="none"/>
+            <path d="M50 20L25 40L32 70H68L75 40L50 20Z" stroke="#00ff88" stroke-width="2" fill="rgba(0,255,136,0.1)"/>
+            <text x="50" y="55" text-anchor="middle" fill="#00ff88" font-family="Orbitron" font-size="14" font-weight="700">VIP</text>
+          </svg>
+        </div>
+        <h1 class="rank-title">VIP</h1>
+        <div class="rank-price-tag">199 BDT <span>/ month</span></div>
+      </div>
+
+      <div class="right-panel">
+        <div class="section-header">
+          <h3>Package Details</h3>
+          <div class="section-line"></div>
+        </div>
+
+        <ul class="perk-list">
+          <li class="perk-item">
+            <div class="perk-icon-box"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+            <div class="perk-content">
+              <h4>Custom Chat Color</h4>
+              <p>Stand out in the chat with a custom color of your choice. Be unique.</p>
+            </div>
+          </li>
+          <li class="perk-item">
+            <div class="perk-icon-box"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
+            <div class="perk-content">
+              <h4>Monthly VIP Kit</h4>
+              <p>Receive a special kit every month containing rare resources and items.</p>
+            </div>
+          </li>
+          <li class="perk-item">
+            <div class="perk-icon-box"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+            <div class="perk-content">
+              <h4>5 Home Locations</h4>
+              <p>Set up to 5 home teleport points. Fast travel across your bases.</p>
+            </div>
+          </li>
+          <li class="perk-item">
+            <div class="perk-icon-box"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+            <div class="perk-content">
+              <h4>Priority Queue</h4>
+              <p>Skip the wait! Join the server even when it's full with reserved slots.</p>
+            </div>
+          </li>
+        </ul>
+
+        <div class="actions">
+          <button class="btn btn-buy" onclick="alert('Redirecting to payment...')">Proceed to Checkout</button>
+          <a href="../index.html#ranks" class="btn btn-back">Back</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

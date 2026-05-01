@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ELITE Rank - MineVerse BD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --green-primary: #00ff88; --green-glow: rgba(0, 255, 136, 0.5); --glass-bg: rgba(10, 10, 10, 0.85); }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Space Grotesk', sans-serif; background: #000; color: #fff; overflow-x: hidden; min-height: 100vh; }
+    .video-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
+    .container { display: flex; min-height: 100vh; width: 100%; align-items: center; justify-content: center; padding: 40px 20px; }
+    .split-card { display: flex; width: 100%; max-width: 1000px; background: var(--glass-bg); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; overflow: hidden; backdrop-filter: blur(15px); box-shadow: 0 0 50px rgba(0,0,0,0.5); }
+    .left-panel { flex: 1; padding: 50px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.2); border-right: 1px solid rgba(255,255,255,0.05); position: relative; overflow: hidden; }
+    .left-panel::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(0,255,136,0.1) 0%, transparent 60%); opacity: 0.5; }
+    .right-panel { flex: 1.5; padding: 50px; display: flex; flex-direction: column; justify-content: center; }
+    .rank-icon { width: 140px; height: 140px; margin-bottom: 30px; filter: drop-shadow(0 0 30px var(--green-glow)); position: relative; z-index: 2; animation: float 4s ease-in-out infinite; }
+    .rank-title { font-family: 'Orbitron', sans-serif; font-size: 42px; font-weight: 900; text-align: center; background: linear-gradient(to bottom right, #fff, var(--green-primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
+    .rank-price-tag { font-family: 'Orbitron', sans-serif; font-size: 28px; color: var(--green-primary); text-align: center; font-weight: 700; }
+    .rank-price-tag span { font-size: 14px; color: #888; font-family: 'Space Grotesk', sans-serif; font-weight: 500; }
+    .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 25px; margin-top: 20px; }
+    .section-header h3 { font-family: 'Orbitron', sans-serif; font-size: 14px; letter-spacing: 1px; color: var(--green-primary); text-transform: uppercase; }
+    .section-line { flex: 1; height: 1px; background: linear-gradient(90deg, var(--green-primary), transparent); }
+    .perk-list { list-style: none; }
+    .perk-item { display: flex; align-items: flex-start; gap: 15px; margin-bottom: 18px; opacity: 0; transform: translateY(20px); animation: fadeInUp 0.5s forwards; }
+    .perk-item:nth-child(1) { animation-delay: 0.1s; }.perk-item:nth-child(2) { animation-delay: 0.2s; }.perk-item:nth-child(3) { animation-delay: 0.3s; }.perk-item:nth-child(4) { animation-delay: 0.4s; }
+    .perk-icon-box { width: 40px; height: 40px; background: rgba(0,255,136,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid rgba(0,255,136,0.2); }
+    .perk-icon-box svg { width: 20px; height: 20px; stroke: var(--green-primary); }
+    .perk-content h4 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+    .perk-content p { font-size: 13px; color: #aaa; line-height: 1.5; }
+    .actions { display: flex; gap: 15px; margin-top: 30px; }
+    .btn { padding: 14px 30px; border-radius: 8px; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; }
+    .btn-buy { flex: 1; background: var(--green-primary); color: #000; border: none; box-shadow: 0 0 20px var(--green-glow); justify-content: center; }
+    .btn-buy:hover { transform: translateY(-2px); box-shadow: 0 0 30px var(--green-glow); }
+    .btn-back { background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); }
+    .btn-back:hover { background: rgba(255,255,255,0.1); }
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 768px) { .container { padding: 20px; align-items: flex-start; margin-top: 40px; } .split-card { flex-direction: column; } .left-panel { padding: 30px; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); } .right-panel { padding: 30px; } .rank-icon { width: 100px; height: 100px; } }
+  </style>
+</head>
+<body>
+  <video class="video-bg" src="overworld.mp4" autoplay muted loop playsinline></video>
+  <div class="container">
+    <div class="split-card">
+      <div class="left-panel">
+        <div class="rank-icon">
+          <svg viewBox="0 0 100 100" fill="none">
+            <path d="M50 5L20 25L20 55L50 95L80 55L80 25L50 5Z" stroke="#00ff88" stroke-width="3" fill="none"/>
+            <path d="M50 15L28 32L28 55L50 85L72 55L72 32L50 15Z" stroke="#00ff88" stroke-width="2" fill="rgba(0,255,136,0.15)"/>
+            <circle cx="50" cy="48" r="15" stroke="#00ff88" stroke-width="2" fill="rgba(0,255,136,0.1)"/>
+            <text x="50" y="53" text-anchor="middle" fill="#00ff88" font-family="Orbitron" font-size="10" font-weight="700">ELITE</text>
+          </svg>
+        </div>
+        <h1 class="rank-title">ELITE</h1>
+        <div class="rank-price-tag">699 BDT <span>/ month</span></div>
+      </div>
+      <div class="right-panel">
+        <div class="section-header"><h3>Package Details</h3><div class="section-line"></div></div>
+        <ul class="perk-list">
+          <li class="perk-item">
+            <div class="perk-icon-box"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="perk-content"><h4>All MVP Perks</h4><p>Retain all benefits from previous tiers including flight and priority access.</p></div>
+          </li>
+          <li class="perk-item">
+            <div class="perk-icon-box"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+            <div class="perk-content"><h4>Daily Elite Kit</h4><p>The best daily kit available. High-tier loot and rare items delivered every 24 hours.</p></div>
+          </li>
+          <li class="perk-item">
+            <div class="perk-icon-box"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+            <div class="perk-content"><h4>20 Home Locations</h4><p>Massively expanded teleport capacity for the ultimate explorer.</p></div>
+          </li>
+          <li class="perk-item">
+            <div class="perk-icon-box"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+            <div class="perk-content"><h4>Custom Nickname</h4><p>Change your in-game display name to something unique.</p></div>
+          </li>
+        </ul>
+        <div class="actions">
+          <button class="btn btn-buy" onclick="alert('Redirecting to payment...')">Proceed to Checkout</button>
+          <a href="../index.html#ranks" class="btn btn-back">Back</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
